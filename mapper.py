@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import make_interp_spline
 
 
-def get_image_file_path(frame_seq=0, base_dir='dataset/fountain-P11'):
-    images_dir = 'images'
-    seq_image_file_path = "{}/{}/{:04d}.jpg".format(
+def get_image_file_path(frame_seq=0, base_dir='SfM_quality_evaluation'):
+    images_dir = 'urd'
+    seq_image_file_path = "{}/{}/{:04d}.png".format(
         base_dir, images_dir, frame_seq)
     return seq_image_file_path
 
@@ -29,9 +29,9 @@ def display_image(img=read_image()):
     cv2.destroyAllWindows()
 
 
-def get_camera_info_file_path(frame_seq=0, base_dir='dataset/fountain-P11'):
-    camera_info_dir = 'gt_dense_cameras'
-    camera_info_file_path = "{}/{}/{:04d}.jpg.camera".format(
+def get_camera_info_file_path(frame_seq=0, base_dir='SfM_quality_evaluation'):
+    camera_info_dir = 'urd'
+    camera_info_file_path = "{}/{}/{:04d}.png.camera".format(
         base_dir, camera_info_dir, frame_seq)
     return camera_info_file_path
 
@@ -144,10 +144,16 @@ def get_photometric_loss(px_a, px_b):
 
 def plot_photometric_loss(p_a, z_p_a_est, T_b_a, K, img_a, img_b, do_plot=False):
     '''Computes photometric loss vs depth along epipolar line'''
+    # z_p_a_est is mid depth value
+    # z_p_a is depth
     dims = np.flip(img_a.shape[:-1])
     depth_eps = 0.5
     depths = []
     p_loss = []
+    p_b = get_point_correspondence(
+            p_a, 6.9, T_b_a, K)
+    # print("p_b: ", p_b)
+        
     for z_p_a in np.linspace(z_p_a_est-depth_eps, z_p_a_est+depth_eps, 100):
         p_b = get_point_correspondence(
             p_a, z_p_a, T_b_a, K)
@@ -185,10 +191,15 @@ if __name__ == "__main__":
     seq_len = 11
     a_idx = 0
     # bottom right cross marker
-    p_a = np.array([2319, 1866])
+    p_a = np.array([2319, 1866])# [2319, 1866] in [3074, 2014], width = 3072, height = 2048
+    # print(np.flip(p_a))
     depth_a = 6.9
     # p_b = np.array([2810, 1647])
     K, T_a_w, img_dim = get_camera_info(a_idx)
+    print("P: ", np.matmul(K, T_a_w[:3, :]))
+    # P:  [[-1.053e+02 -3.146e+03 -1.371e+02 -2.458e+04]
+    #      [-1.155e+03 -5.634e+02  2.646e+03 -1.322e+04]
+    #      [-8.875e-01 -4.492e-01 -1.025e-01 -9.845e+00]]
 
     seq_depths = []
     seq_p_loss = []
@@ -202,6 +213,7 @@ if __name__ == "__main__":
     plt.ylabel('photometric loss')
 
     for b_idx in range(1, seq_len):
+    # for b_idx in range(1, 2):
         img_b = read_image(get_image_file_path(b_idx))
         _, T_b_w, _ = get_camera_info(b_idx)
         T_b_a = np.matmul(T_b_w, np.linalg.inv(T_a_w))
@@ -215,7 +227,7 @@ if __name__ == "__main__":
                     len(seq_p_loss), 'seq avg.', True)
     plt.legend()
     plt.savefig('photometric_loss_vs_depth__Fountain_P11.png')
-    plt.show()
+    # plt.show()
 
     # plot_stereo_correspondence(a_gt, b_gt, img_a, img_b)
     # estimate_depth(a_gt, b_gt, T_b_a, K)

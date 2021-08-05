@@ -1,4 +1,20 @@
 # DTAM: Dense Tracking and Mapping in Real-time
+
+
+## usage
+```bash
+docker build -t rin/python:opencv ./python_docker/
+```
+
+```bash
+docker run --rm -it -v $HOME/coding/:/opt/coding/ -w /opt/coding/ rin/python:opencv
+```
+
+```bash
+python mapper.py
+```
+you can see generated `photometric_loss_vs_depth__Fountain_P11.png`.
+
 ## Overview
 This is an implementation of [DTAM: Dense Tracking and Mapping in Real-Time - Richard A. Newcombe](http://ugweb.cs.ualberta.ca/~vis/courses/CompVis/readings/3DReconstruction/dtam.pdf). This paper proposes using all pixels instead of just some collection of feature points for tracking camera pose as well as dense mapping of environment. Merits are shown over feature based tracking as tracking is more robust to motion blur, camera defocus, even at high framerates. On the mapping side, depth of all pixels is obtained with smooth surface assumption for low-textured regions. System was designed for AR/VR application where we can first build map of the confined environment and then use this for realtime tracking with GPU.
 ## Motivation
